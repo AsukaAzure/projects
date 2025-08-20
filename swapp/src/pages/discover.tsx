@@ -1,5 +1,5 @@
 
-export default function Match() {
+export default function Discover() {
   return (
     <div>Match</div>
   )

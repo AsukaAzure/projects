@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+// import { useAuth } from "./AuthContext";
 
 export default function Login() {
   const [formData, setFormData] = useState({});
@@ -12,6 +13,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("signin");
   const navigate = useNavigate();
+  // const { login } = useAuth();
   let url = "";
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -42,9 +44,11 @@ export default function Login() {
         setLoading(false);
         return;
       }
+      // login(data.user);
+      // console.log(data);
       setLoading(false);
       setError(null);
-      navigate("/dashboard");
+      navigate("/home");
     } catch (error: any) {
       setLoading(false);
       setError(error.message);
