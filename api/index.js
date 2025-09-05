@@ -24,6 +24,11 @@ app.listen(3001, () => {
 
 app.use("/api/auth", authroute);
 
+app.post("/api/auth/logout", (req, res) => {
+  res.clearCookie("access_token");
+  return res.status(200).json({ message: "Logged out" });
+});
+
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
   const message = err.message || "Internal server error";

@@ -38,7 +38,11 @@ export default function Login() {
         body: JSON.stringify(formData),
       });
       const data = await res.json();
+      localStorage.setItem("user", JSON.stringify(data));
+
+
       console.log(data);
+      // const token = cookies.get(access_cookie)
       if (data.success === false) {
         setError(data.message);
         setLoading(false);
@@ -60,7 +64,7 @@ export default function Login() {
       <form onSubmit={handleSubmit}>
         <div className="flex justify-center items-center min-h-screen mx-auto gap-6">
           <Tabs
-            defaultValue="login"
+            defaultValue="signin"
             className="w-[400px]"
             onValueChange={(val) => {
               setActiveTab(val);
@@ -68,11 +72,11 @@ export default function Login() {
           >
             <div className="flex w-full max-w-sm flex-col gap-6">
               <TabsList className="w-[250px]">
-                <TabsTrigger value="login">Log in</TabsTrigger>
+                <TabsTrigger value="signin">Log in</TabsTrigger>
                 <TabsTrigger value="signup">Register</TabsTrigger>
               </TabsList>
             </div>
-            <TabsContent value="login">
+            <TabsContent value="signin">
               <Card>
                 <CardHeader>
                   <CardTitle className="text-3xl font-bold">Log in</CardTitle>
@@ -81,9 +85,9 @@ export default function Login() {
                   <div className="grid gap-3">
                     <Label>Email</Label>
                     <Input
-                      id="email"
+                      id="username"
                       placeholder="user@gmail.com"
-                      type="email"
+                      type="text"
                       onChange={handleChange}
                     />
                   </div>

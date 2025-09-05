@@ -8,6 +8,8 @@ import { Search, Filter, TrendingUp } from "lucide-react";
 export const Home = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState<"recent" | "votes">("recent");
+  const storedUser = localStorage.getItem("user");
+  const user = storedUser ? JSON.parse(storedUser) : null;
 
   const filteredQuestions = mockQuestions
     .filter(question => 
@@ -28,7 +30,7 @@ export const Home = () => {
       <div className="space-y-6 pb-8">
         <div className="space-y-4">
           <h1 className="text-5xl font-bold bg-gradient-to-r from-foreground via-primary-glow to-primary bg-clip-text text-transparent">
-            Welcome to Anus
+            Welcome {user? user.username : "Guest"}
           </h1>
         </div>
       </div>
