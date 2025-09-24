@@ -11,20 +11,23 @@ import MainLayout from "./layouts/MainLayout";
 import AuthLayout from "./layouts/AuthLayout";
 import ProtectedRoutes from "./utils/ProtectedRoute";
 import { QuestionDetails } from "./pages/QuestionDetail";
+import Leaderboard from "./pages/leaderboard";
 
 export default function AppRoute() {
   return (
     <>
       <Routes>
         <Route element={<MainLayout />}>
-          <Route path="/home" element={<Home />} />
-          <Route path="/question/:id" element={<QuestionDetails />} />
-          <Route path="/discover" element={<Discover />} />
-          <Route path="/search" element={<Search />} />
           <Route element={<ProtectedRoutes />}>
             <Route path="/profile" element={<Profile />} />
             <Route path="/question" element={<Question />} />
           </Route>
+          <Route path="/home" element={<Home />} />
+          <Route path="/question/:id" element={<QuestionDetails />} />
+          <Route path="/discover" element={<Discover />} />
+          <Route path="/search" element={<Search />} />
+          <Route path="/leaderboard" element={<Leaderboard />} />
+          
         </Route>
         <Route element={<AuthLayout />}>
           <Route path="/" element={<Welcome />} />

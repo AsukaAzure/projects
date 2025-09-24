@@ -17,6 +17,7 @@ import {
   BookOpen,
   Globe,
 } from "lucide-react";
+import logo from "../assets/byteflow_no_bg_refined1.png"
 
 export default function Welcome() {
   const navigate = useNavigate();
@@ -75,12 +76,13 @@ export default function Welcome() {
   return (
     <div className="min-h-screen space-y-16 pb-8">
       <header className="flex items-center justify-between px-6 py-4 border-b border-border/40 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
-        <div
+        {/* <div
           className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent cursor-pointer"
           onClick={() => navigate("/")}
         >
-          TechQ&A
-        </div>
+          ByteFlow
+        </div> */}
+        <img src={logo} className="max-w-[15%]"/>
 
         <div className="flex items-center gap-4">
           <Button
@@ -96,7 +98,7 @@ export default function Welcome() {
       <div className="text-center space-y-8">
         <div className="space-y-6">
           <h1 className="text-6xl md:text-7xl font-bold bg-gradient-to-br from-foreground via-primary-glow to-primary bg-clip-text text-transparent leading-tight">
-            TechQ&A
+            ByteFlow
           </h1>
 
           <p className="text-2xl md:text-3xl text-white/80 max-w-4xl mx-auto leading-relaxed">

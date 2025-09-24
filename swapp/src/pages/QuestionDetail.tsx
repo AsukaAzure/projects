@@ -127,7 +127,7 @@ export const QuestionDetails = () => {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleVote(answer.id, "up")}
-                      className="hover:bg-success/20 hover:text-success"
+                      className="hover:bg-green-300/50 hover:text-success"
                     >
                       <ArrowUp className="w-5 h-5" />
                     </Button>
@@ -138,7 +138,7 @@ export const QuestionDetails = () => {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleVote(answer.id, "down")}
-                      className="hover:bg-destructive/20 hover:text-destructive"
+                      className="hover:bg-destructive/30 hover:text-destructive"
                     >
                       <ArrowDown className="w-5 h-5" />
                     </Button>

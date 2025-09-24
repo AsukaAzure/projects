@@ -37,7 +37,9 @@ export default function Login() {
         },
         body: JSON.stringify(formData),
       });
+      //store user data 
       const data = await res.json();
+      // localStorage.setItem("access_token", data.token);
       localStorage.setItem("user", JSON.stringify(data));
 
 

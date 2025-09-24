@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import axios from 'axios';
+import img1 from '../assets/byteflow_no_bg_refined1.png'
 
 export default function MainLayout() {
   const navigate = useNavigate();
@@ -15,7 +16,7 @@ export default function MainLayout() {
     try {
       await axios.post("/api/auth/logout", {}, { withCredentials: true });
       localStorage.removeItem("user");
-      navigate("/login");
+      navigate("/");
       console.log("done")
     } catch (err) {
       console.error("Logout failed", err);
@@ -33,9 +34,10 @@ export default function MainLayout() {
         <header className="flex h-14 items-center gap-2 border-b px-4">
           <SidebarTrigger />
           <Link to={"/"}>
-            <h1 className="text-2xl bg-gradient-to-br from-foreground via-primary-glow to-primary bg-clip-text text-transparent leading-tight font-bold">
-              Q&A
-            </h1>
+            {/* <h1 className="text-2xl bg-gradient-to-br from-foreground via-primary-glow to-primary bg-clip-text text-transparent leading-tight font-bold">
+              ByteFlow
+            </h1> */}
+            <img src={img1} className="max-w-[20%]"/>
           </Link>
           <Link to={"/login"} className="ml-auto">
           <Button >Login</Button>

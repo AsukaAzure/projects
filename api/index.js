@@ -2,6 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import authroute from "./routes/auth.route.js";
+import questroute from './routes/question.route.js'
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.listen(3001, () => {
 });
 
 app.use("/api/auth", authroute);
+app.use("/api/question",questroute);
 
 app.post("/api/auth/logout", (req, res) => {
   res.clearCookie("access_token");
