@@ -4,26 +4,26 @@ const QuesSchema = new mongoose.Schema(
   {
     title: {
       type: String,
-      require: true,
+      required: true,
       trim: true,
       minlength: 10,
       maxlength: 150,
     },
     body: {
       type: String,
-      require: true,
+      required: true,
       minlength: 20,
       maxlength: 20000,
     },
     tags: {
       type: [String],
-      require: true,
+      required: true,
     },
 
     author: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      require: true,
+      required: true,
       index: true,
     },
 
@@ -32,10 +32,14 @@ const QuesSchema = new mongoose.Schema(
         default: 0,
     },
 
-    answersCount: {
-      type: Number,
-      default: 0,
-      min: 0,
+    // answersCount: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "Answer",
+    //   default: 0,
+    // },
+    createdAt: {
+      type: Date,
+      default: Date.now,
     },
   },
   { timestamps: true }

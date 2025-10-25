@@ -11,6 +11,8 @@ import img1 from '../assets/byteflow_no_bg_refined1.png'
 
 export default function MainLayout() {
   const navigate = useNavigate();
+  const user = localStorage.getItem("user");
+
 
   const handleLogout = async () => {
     try {
@@ -39,12 +41,15 @@ export default function MainLayout() {
             </h1> */}
             <img src={img1} className="max-w-[20%]"/>
           </Link>
-          <Link to={"/login"} className="ml-auto">
-          <Button >Login</Button>
-          </Link>
-          <Button onClick={handleLogout}>Logout</Button>
+          {user ? (
+            <Button onClick={handleLogout} className="ml-auto">Logout</Button>
+          ) : (
+            <Link to={"/login"} className="ml-auto">
+              <Button>Login</Button>
+            </Link>
+          )}
         </header>
-
+        
         {/* Routed content */}
         <main className="flex-1 overflow-y-auto p-4">
           <Outlet />

@@ -1,28 +1,71 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { QuestionCard } from "@/components/ui/QuestionCard";
-import { mockQuestions } from "./mock";
-import { Search, Filter, TrendingUp } from "lucide-react";
+import { Search } from "lucide-react";
 
 export const Home = () => {
+  // Explicit Question type to avoid 'never' inference and provide proper typing throughout the component
+  interface Question {
+    _id: string;
+    title: string;
+    content?: string;
+    tags?: string[];
+    votes?: number;
+    createdAt: string;
+    // add other fields returned by your API as needed
+  }
+
+  const [questions, setQuestions] = useState<Question[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState<"recent" | "votes">("recent");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
   const storedUser = localStorage.getItem("user");
   const user = storedUser ? JSON.parse(storedUser) : null;
 
-  const filteredQuestions = mockQuestions
-    .filter(question => 
-      question.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      question.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      question.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+  // Fetch data from backend
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      try {
+        const res = await fetch("/api/question/getquestion");
+        const data = await res.json();
+        if (data.success) {
+          setQuestions(data.questions);
+        } else {
+          setError("Failed to load questions");
+        }
+      } catch (err) {
+        setError("Error fetching questions");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchQuestions();
+  }, []);
+
+  // Filter + Sort
+  const filteredQuestions = questions
+    .filter(
+      (question) =>
+        question.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        question.content?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        question.tags?.some((tag) =>
+          tag.toLowerCase().includes(searchTerm.toLowerCase())
+        )
     )
     .sort((a, b) => {
       if (sortBy === "votes") {
-        return b.votes - a.votes;
+        return (b.votes || 0) - (a.votes || 0);
       }
-      return b.createdAt.getTime() - a.createdAt.getTime();
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
+
+  // Loading state
+  if (loading) return <p>Loading questions...</p>;
+  if (error) return <p>{error}</p>;
 
   return (
     <div className="space-y-8">
@@ -30,54 +73,39 @@ export const Home = () => {
       <div className="space-y-6 pb-8">
         <div className="space-y-4">
           <h1 className="text-5xl font-bold bg-gradient-to-r from-foreground via-primary-glow to-primary bg-clip-text text-transparent">
-            Welcome {user? user.username : "Guest"}
+            Welcome {user ? user.username : "Guest"}
           </h1>
         </div>
       </div>
 
-      {/* Search and Filter */}
-      {/* <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-          <Input
-            placeholder="Search questions..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 bg-muted/50 border-border/50 focus:border-primary/50"
-          />
-        </div>
-        
-        <div className="flex items-center space-x-2">
-          <Filter className="w-4 h-4 text-muted-foreground" />
-          <Button
-            variant={sortBy === "recent" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setSortBy("recent")}
-            className="text-sm"
-          >
-            Recent
-          </Button>
-          <Button
-            variant={sortBy === "votes" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setSortBy("votes")}
-            className="text-sm"
-          >
-            <TrendingUp className="w-4 h-4 mr-1" />
-            Most Voted
-          </Button>
-        </div>
-      </div> */}
+      {/* Search Bar */}
+      <div className="flex gap-3 items-center">
+        <Input
+          placeholder="Search questions..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="max-w-md"
+        />
+        <Button variant="outline" onClick={() => setSortBy("recent")}>
+          Recent
+        </Button>
+        <Button variant="outline" onClick={() => setSortBy("votes")}>
+          Most Voted
+        </Button>
+      </div>
 
       {/* Questions List */}
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-semibold">
-            {searchTerm ? `Search Results (${filteredQuestions.length})` : 'Latest Questions'}
+            {searchTerm
+              ? `Search Results (${filteredQuestions.length})`
+              : "Latest Questions"}
           </h2>
           {filteredQuestions.length > 0 && (
             <span className="text-sm text-muted-foreground">
-              {filteredQuestions.length} question{filteredQuestions.length !== 1 ? 's' : ''}
+              {filteredQuestions.length} question
+              {filteredQuestions.length !== 1 ? "s" : ""}
             </span>
           )}
         </div>
@@ -85,7 +113,7 @@ export const Home = () => {
         {filteredQuestions.length > 0 ? (
           <div className="grid gap-6">
             {filteredQuestions.map((question) => (
-              <QuestionCard key={question.id} question={question} />
+              <QuestionCard key={question._id} question={question} />
             ))}
           </div>
         ) : (
@@ -95,14 +123,13 @@ export const Home = () => {
             </div>
             <h3 className="text-lg font-medium">No questions found</h3>
             <p className="text-muted-foreground">
-              {searchTerm 
+              {searchTerm
                 ? `No questions match "${searchTerm}". Try different keywords.`
-                : "Be the first to ask a question!"
-              }
+                : "Be the first to ask a question!"}
             </p>
-            <Button 
+            <Button
               className="bg-gradient-to-r from-primary to-primary-glow hover:from-primary-dark hover:to-primary"
-              onClick={() => window.location.href = '/ask'}
+              onClick={() => (window.location.href = "/ask")}
             >
               Ask a Question
             </Button>

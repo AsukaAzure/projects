@@ -5,10 +5,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 // import { useAuth } from "./AuthContext";
 
 export default function Login() {
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password: "",
+  });
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("signin");
@@ -27,8 +32,55 @@ export default function Login() {
     url = "/api/auth/signup";
   }
   const handleSubmit = async (e: React.FormEvent<HTMLElement>) => {
+    e.preventDefault();
+    const { username, email, password } = formData;
+
+    if (!username && !email && !password) {
+      toast.warning("Fill all the info");
+      return;
+    }
+
+    if (!username) {
+      toast.warning("Username cannot be blank");
+      return;
+    }
+    if (activeTab === "signup") {
+      if (!email) {
+        toast.warning("Email cannot be blank");
+        return;
+      }
+    }
+
+    if (!password) {
+      toast.warning("Password cannot be blank");
+      return;
+    }
+
+    if (/^\d+$/.test(username)) {
+      toast.error("Username cannot be only numbers");
+      return;
+    }
+
+    if (username.length < 3) {
+      toast.warning("username must be more than 3 letters");
+      return;
+    }
+
+    if (password.length < 3) {
+      toast.warning("password must be more than 3 letters");
+      return;
+    }
+
+    // at least 1 letter, 1 number, 1 special character, minimum 6 characters
+    const passwordRegex =
+      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+
+    if (activeTab === "signup" && !passwordRegex.test(password)) {
+      toast.error("Password must include A-Z, a-z, and a special character.");
+      return;
+    }
+
     try {
-      e.preventDefault();
       setLoading(true);
       const res = await fetch(url, {
         method: "POST",
@@ -37,21 +89,27 @@ export default function Login() {
         },
         body: JSON.stringify(formData),
       });
-      //store user data 
+      //store user data
       const data = await res.json();
-      // localStorage.setItem("access_token", data.token);
-      localStorage.setItem("user", JSON.stringify(data));
-
-
-      console.log(data);
       // const token = cookies.get(access_cookie)
       if (data.success === false) {
-        setError(data.message);
+        toast.error(data.message);
+        // setError(data.message);
         setLoading(false);
         return;
       }
+
+      const userToStore = { ...data.user, token: data.token };
+      localStorage.setItem("user", JSON.stringify(userToStore));
+
       // login(data.user);
       // console.log(data);
+      if(activeTab === "signup") {
+        toast.success("User created successfully!")
+      } else {
+        toast.success("Logged in successfully!")
+      }
+
       setLoading(false);
       setError(null);
       navigate("/home");
@@ -61,6 +119,7 @@ export default function Login() {
     }
   };
   console.log(formData);
+
   return (
     <>
       <form onSubmit={handleSubmit}>
@@ -85,10 +144,10 @@ export default function Login() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid gap-3">
-                    <Label>Email</Label>
+                    <Label>Username</Label>
                     <Input
                       id="username"
-                      placeholder="user@gmail.com"
+                      placeholder="user"
                       type="text"
                       onChange={handleChange}
                     />

@@ -6,7 +6,7 @@ export interface Answer {
   createdAt: Date;
 }
 
-export interface Question {
+export interface Questions {
   id: string;
   title: string;
   content: string;
@@ -17,7 +17,7 @@ export interface Question {
   createdAt: Date;
 }
 
-export const mockQuestions: Question[] = [
+export const mockQuestions: Questions[] = [
   {
     id: "1",
     title: "How to implement React hooks effectively?",

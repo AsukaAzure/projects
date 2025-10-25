@@ -3,7 +3,7 @@ import { createQuestion, listQuestion, requireAuth } from '../controllers/questi
 
 const router = express.Router();
 
-router.post("/postquestion" ,createQuestion);
+router.post("/postquestion", requireAuth, createQuestion);
 router.get("/getquestion", listQuestion)
 
 export default router;

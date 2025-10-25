@@ -46,7 +46,7 @@ export const listQuestion = async (req, res, next) => {
 
     const docs = await Question.find(filter)
       .populate("author", "username email")
-      .sort({ createedAt: -1 });
+      .sort({ createdAt: -1 });
 
     return res.status(200).json({
       success: true,

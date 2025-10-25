@@ -76,13 +76,13 @@ export default function Welcome() {
   return (
     <div className="min-h-screen space-y-16 pb-8">
       <header className="flex items-center justify-between px-6 py-4 border-b border-border/40 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
-        {/* <div
+        <div
           className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent cursor-pointer"
           onClick={() => navigate("/")}
         >
-          ByteFlow
-        </div> */}
-        <img src={logo} className="max-w-[15%]"/>
+          
+        <img src={logo} className="w-[12rem]"/>
+        </div>
 
         <div className="flex items-center gap-4">
           <Button

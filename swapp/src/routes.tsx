@@ -3,15 +3,15 @@ import { Route, Routes } from "react-router-dom";
 import Welcome from "./pages/welcome";
 import Login from "./pages/login";
 import { Home } from "./pages/home";
-import Discover from "./pages/discover";
+import { Discover } from "./pages/discover";
 import Profile from "./pages/profile";
-import Search from "./pages/search";
-import Question from "./pages/question";
+import { SearchPage as Search } from "./pages/search";
+import { Question } from "./pages/question";
 import MainLayout from "./layouts/MainLayout";
 import AuthLayout from "./layouts/AuthLayout";
 import ProtectedRoutes from "./utils/ProtectedRoute";
 import { QuestionDetails } from "./pages/QuestionDetail";
-import Leaderboard from "./pages/leaderboard";
+import { Leaderboard } from "./pages/leaderboard";
 
 export default function AppRoute() {
   return (
@@ -27,7 +27,6 @@ export default function AppRoute() {
           <Route path="/discover" element={<Discover />} />
           <Route path="/search" element={<Search />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
-          
         </Route>
         <Route element={<AuthLayout />}>
           <Route path="/" element={<Welcome />} />

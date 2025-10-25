@@ -9,8 +9,27 @@ export const signup = async (req, res, next) => {
   const newUser = new user({ username, email, password: hashedPassword });
   try {
     await newUser.save();
-    res.status(201).json("User created succesfully!");
+    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
+
+    const { password: pass, ...rest } = newUser._doc;
+
+    res.status(201).json({
+      success: true,
+      message: "User created successfully!",
+      user: rest,
+      token: token,
+    });
   } catch (error) {
+    // 11000 -> mongo db says that there is a duplicate key
+    if (error.code === 11000) {
+      // Duplicate key error
+      if (error.keyPattern.username) {
+        return res.status(400).json({ success: false, message: "Username already exists" });
+      }
+      if (error.keyPattern.email) {
+        return res.status(400).json({ success: false, message: "Email already exists" });
+      }
+    }
     next(error);
   }
 };
@@ -19,18 +38,20 @@ export const signin = async (req, res, next) => {
   const { username, password } = req.body;
   try {
     const validUser = await user.findOne({ username });
-    if (!validUser) return next(errorHandler("401", "Invalid User!"));
+    if (!validUser) return next(errorHandler(401, "Invalid User!"));
     const validPassword = bcryptjs.compareSync(password, validUser.password);
-    if (!validPassword) return next(errorHandler("401", "Invalid Password!"));
+    if (!validPassword) return next(errorHandler(401, "Invalid Password!"));
     const token = jwt.sign(
       { id: validUser._id },
       process.env.JWT_SECRET
     );
     const { password: pass, ...rest } = validUser._doc;
-    res
-      .cookie("access_token", token, { httpOnly: true })
-      .status(200)
-      .json(rest);
+    res.status(200).json({
+      success: true,
+      message: "Logged in successfully!",
+      user: rest,
+      token: token,
+    });
   } catch (error) {
     next(error);
   }
