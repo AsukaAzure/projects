@@ -32,11 +32,11 @@ const QuesSchema = new mongoose.Schema(
         default: 0,
     },
 
-    // answersCount: {
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: "Answer",
-    //   default: 0,
-    // },
+    answers: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Answer",
+      // default: 0,
+    }],
     createdAt: {
       type: Date,
       default: Date.now,

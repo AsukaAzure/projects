@@ -39,7 +39,7 @@ export const QuestionCard = ({ question }: QuestionCardProps) => {
 
       <CardContent className="pb-3">
         <p className="text-muted-foreground line-clamp-3 leading-relaxed">
-          {question.body}
+          {question.body?.slice(0, 150)+"..."}
         </p>
         
         <div className="flex flex-wrap gap-2 mt-2">
@@ -62,10 +62,10 @@ export const QuestionCard = ({ question }: QuestionCardProps) => {
             {question.votes}
           </Button>
           
-          {/* <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
+          <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
             <MessageSquare className="w-4 h-4 mr-1" />
-            {question.answers.length} {question.answers.length === 1 ? 'answer' : 'answers'}
-          </Button> */}
+            {question.answers?.length} {question.answers?.length === 1 ? 'answer' : 'answers'}
+          </Button>
         </div>
 
         <Button variant="ghost" size="sm" asChild className="hover:bg-primary/10 hover:text-primary">

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -14,8 +14,48 @@ export const QuestionDetails = () => {
   const [newAnswer, setNewAnswer] = useState("");
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [votes, setVotes] = useState<Record<string, number>>({});
+  const [question, setQuestion] = useState<any>(null);
+  // const question = mockQuestions.find(q => q.id === id);
 
-  const question = mockQuestions.find(q => q.id === id);
+  useEffect(() => {
+    const fetchQuestion = async () => {
+      if (!id) return;
+      try {
+        const res = await fetch(`/api/question/getquestion/${id}`);
+        if (!res.ok) {
+          const errBody = await res.json().catch(() => ({}));
+          throw new Error(errBody.message || `Request failed: ${res.status}`);
+        }
+        const data = await res.json();
+        const q = data.question || data;
+
+        // normalize question shape for the UI
+        const normalized = {
+          id: q._id ?? q.id,
+          title: q.title,
+          content: q.body ?? q.content ?? "",
+          tags: Array.isArray(q.tags) ? q.tags : [],
+          votes: q.votes ?? 0,
+          createdAt: q.createdAt ? new Date(q.createdAt) : new Date(),
+          author: q.author?.username ?? q.author ?? "Unknown",
+          answers: (Array.isArray(q.answers) ? q.answers : q.answers ? [q.answers] : []).map((a: any) => ({
+            id: a._id ?? a.id,
+            content: a.content,
+            author: a.author?.username ?? a.author ?? "Unknown",
+            votes: a.votes ?? 0,
+            createdAt: a.createdAt ? new Date(a.createdAt) : new Date(),
+          })),
+        };
+
+        setQuestion(normalized);
+      } catch (err) {
+        console.error("Failed to fetch question:", err);
+        setQuestion(null);
+      }
+    };
+
+    fetchQuestion();
+  },[id])
 
   if (!question) {
     return (

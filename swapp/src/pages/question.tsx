@@ -7,7 +7,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { X, Plus, Send, HelpCircle } from "lucide-react";
-import { mockQuestions, type Questions } from "./mock";
 import { toast } from "react-toastify";
 
 export const Question = () => {
@@ -182,7 +181,7 @@ export const Question = () => {
                       variant="ghost"
                       size="sm"
                       onClick={() => removeTag(tag)}
-                      className="ml-1 h-auto p-0 w-4 h-4 hover:bg-transparent hover:text-destructive"
+                      className="ml-1 h-auto p-0 w-4 hover:bg-transparent hover:text-destructive"
                     >
                       <X className="w-3 h-3" />
                     </Button>

@@ -8,11 +8,17 @@ export const Home = () => {
   // Explicit Question type to avoid 'never' inference and provide proper typing throughout the component
   interface Question {
     _id: string;
-    title: string;
-    content?: string;
-    tags?: string[];
-    votes?: number;
-    createdAt: string;
+  title: string;
+  body?: string;
+  tags: string[];
+  votes: number;
+  createdAt: string;
+  author: {
+    _id: string;
+    username: string;
+    email: string;
+  };
+  answers?: any[]; 
     // add other fields returned by your API as needed
   }
 
@@ -51,7 +57,7 @@ export const Home = () => {
     .filter(
       (question) =>
         question.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        question.content?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        question.body?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         question.tags?.some((tag) =>
           tag.toLowerCase().includes(searchTerm.toLowerCase())
         )
