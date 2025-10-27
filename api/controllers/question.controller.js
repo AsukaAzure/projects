@@ -5,6 +5,7 @@ import { errorHandler } from "../utils/error.js";
 import { validQuestion } from "../utils/validator.js";
 import jwt from "jsonwebtoken";
 import Answer from "../models/answer.model.js";
+import Voteing from "../models/vote.model.js";
 
 export const createQuestion = async (req, res, next) => {
   try {
@@ -134,5 +135,67 @@ export const postAnswer = async (req, res, next) => {
     });
   } catch (err) {
     next(err);
+  }
+};
+
+
+export const vote = async (req, res, next) => {
+  try {
+    const { targetId, targetType, voteType } = req.body;
+    const userId = req.user?.id;
+
+    if(!userId) return next(errorHandler(401, "Unauthorized access"));
+
+    const existingVote = await Voteing.findOne({
+      userId,
+      targetId,
+      targetType,
+      voteType,
+    })
+
+    if(existingVote) {
+      if(existingVote.voteType === voteType) {
+        await existingVote.deleteOne();
+        await updateVoteCount(targetId, targetType);
+        return res.status(200).json({
+          success: true,
+          message: "Vote removed successfully",
+        });
+      }else {
+        existingVote.voteType = voteType;
+        await existingVote.save();
+        return res.status(200).json({
+          success: true,
+          message: "Vote updated successfully",
+        }); 
+      }
+    }else{
+        //new vote
+        const newVote = new Voteing({
+          userId,
+          targetId,
+          targetType,
+          voteType,
+        });
+        await newVote.save();
+        await updateVoteCount(targetId, targetType);
+        return res.status(201).json()({
+          success: true,
+          message: "Vote created successfully",
+    })
+    };
+  } catch (err) {
+    next(err);
+  }
+}
+// helper to update total votes on target
+const updateVoteCount = async (targetType, targetId) => {
+  const allVotes = await Vote.find({ targetId, targetType });
+  const total = allVotes.reduce((sum, v) => sum + v.voteType, 0);
+
+  if (targetType === "Question") {
+    await Question.findByIdAndUpdate(targetId, { votes: total });
+  } else if (targetType === "Answer") {
+    await Answer.findByIdAndUpdate(targetId, { votes: total });
   }
 };

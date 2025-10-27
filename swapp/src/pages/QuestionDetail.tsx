@@ -4,10 +4,19 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowUp, ArrowDown, MessageSquare, User, Clock, Send, ArrowLeft } from "lucide-react";
+import {
+  ArrowUp,
+  ArrowDown,
+  MessageSquare,
+  User,
+  Clock,
+  Send,
+  ArrowLeft,
+} from "lucide-react";
 import { mockQuestions } from "./mock";
 import type { Answer } from "./mock";
 import { formatDistanceToNow } from "date-fns";
+import { toast } from "react-toastify";
 
 export const QuestionDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -15,7 +24,10 @@ export const QuestionDetails = () => {
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [votes, setVotes] = useState<Record<string, number>>({});
   const [question, setQuestion] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   // const question = mockQuestions.find(q => q.id === id);
+  const storedUser = localStorage.getItem("user");
+  const user = storedUser ? JSON.parse(storedUser) : null;
 
   useEffect(() => {
     const fetchQuestion = async () => {
@@ -38,7 +50,12 @@ export const QuestionDetails = () => {
           votes: q.votes ?? 0,
           createdAt: q.createdAt ? new Date(q.createdAt) : new Date(),
           author: q.author?.username ?? q.author ?? "Unknown",
-          answers: (Array.isArray(q.answers) ? q.answers : q.answers ? [q.answers] : []).map((a: any) => ({
+          answers: (Array.isArray(q.answers)
+            ? q.answers
+            : q.answers
+            ? [q.answers]
+            : []
+          ).map((a: any) => ({
             id: a._id ?? a.id,
             content: a.content,
             author: a.author?.username ?? a.author ?? "Unknown",
@@ -55,13 +72,65 @@ export const QuestionDetails = () => {
     };
 
     fetchQuestion();
-  },[id])
+  }, [id]);
+
+  const handleSubmitAnswer = async () => {
+    const storedUser = localStorage.getItem("user");
+    const user = storedUser ? JSON.parse(storedUser) : null;
+    const token = user?.token || user?.access_token;
+
+    if (!user || !token) {
+      toast.error("Please log in (missing token)");
+      return;
+    }
+
+    if (!newAnswer.trim()) {
+      toast.error("Answer cannot be empty");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/question/getquestion/${id}/answer`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ content: newAnswer }),
+        // credentials: "include" // uncomment if your backend expects cookies
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to post answer");
+
+      const serverAnswer = data.answer;
+      const newAns = {
+        id: serverAnswer?._id || Date.now().toString(),
+        content: serverAnswer?.content || newAnswer,
+        author: serverAnswer?.author?.username || user.username || "You",
+        votes: serverAnswer?.votes ?? 0,
+        createdAt: serverAnswer?.createdAt ? new Date(serverAnswer.createdAt) : new Date(),
+      };
+
+      setAnswers((prev) => [...prev, newAns]);
+      setNewAnswer("");
+      toast.success("Answer posted!");
+    } catch (err: any) {
+      toast.error(err.message || "Unable to post answer");
+      console.error("post answer error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (!question) {
     return (
       <div className="text-center py-12 space-y-4">
         <h2 className="text-2xl font-semibold">Question not found</h2>
-        <p className="text-muted-foreground">The question you're looking for doesn't exist.</p>
+        <p className="text-muted-foreground">
+          The question you're looking for doesn't exist.
+        </p>
         <Button asChild>
           <Link to="/">Back to Home</Link>
         </Button>
@@ -71,25 +140,10 @@ export const QuestionDetails = () => {
 
   const allAnswers = [...question.answers, ...answers];
 
-  const handleSubmitAnswer = () => {
-    if (!newAnswer.trim()) return;
-
-    const answer: Answer = {
-      id: `new-${Date.now()}`,
-      content: newAnswer,
-      author: "CurrentUser",
-      votes: 0,
-      createdAt: new Date()
-    };
-
-    setAnswers([...answers, answer]);
-    setNewAnswer("");
-  };
-
   const handleVote = (answerId: string, direction: "up" | "down") => {
-    setVotes(prev => ({
+    setVotes((prev) => ({
       ...prev,
-      [answerId]: (prev[answerId] || 0) + (direction === "up" ? 1 : -1)
+      [answerId]: (prev[answerId] || 0) + (direction === "up" ? 1 : -1),
     }));
   };
 
@@ -104,61 +158,98 @@ export const QuestionDetails = () => {
       </Button>
 
       {/* Question */}
+              
       <Card className="bg-gradient-to-br from-card to-card/80 border-primary/20 shadow-lg">
-        <CardHeader className="space-y-4">
-          <h1 className="text-3xl font-bold leading-tight">{question.title}</h1>
-          
-          <div className="flex items-center space-x-6 text-sm text-muted-foreground">
-            <div className="flex items-center space-x-2">
-              <User className="w-4 h-4" />
-              <span className="font-medium">{question.author}</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Clock className="w-4 h-4" />
-              <span>{formatDistanceToNow(question.createdAt, { addSuffix: true })}</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <ArrowUp className="w-4 h-4" />
-              <span className="font-medium">{question.votes} votes</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <MessageSquare className="w-4 h-4" />
-              <span>{allAnswers.length} answers</span>
-            </div>
-          </div>
+  <div className="flex">
+    {/* Voting section - LEFT SIDE */}
+    <div className="flex flex-col items-center space-y-2 px-4 py-6 border-r border-primary/10">
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => handleVote(question.id, "up")}
+        className="hover:bg-green-300/50 hover:text-success"
+      >
+        <ArrowUp className="w-5 h-5" />
+      </Button>
+      <span className="text-lg font-semibold">
+        {question.votes + (votes[question.id] || 0)}
+      </span>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => handleVote(question.id, "down")}
+        className="hover:bg-destructive/30 hover:text-destructive"
+      >
+        <ArrowDown className="w-5 h-5" />
+      </Button>
+    </div>
 
-          <div className="flex flex-wrap gap-2">
-            {question.tags.map((tag) => (
-              <Badge 
-                key={tag} 
-                variant="secondary"
-                className="bg-primary/10 text-primary hover:bg-primary/20"
-              >
-                {tag}
-              </Badge>
-            ))}
-          </div>
-        </CardHeader>
+    {/* Main content - RIGHT SIDE */}
+    <div className="flex-1">
+      <CardHeader className="space-y-4">
+        <h1 className="text-3xl font-bold leading-tight">{question.title}</h1>
 
-        <CardContent>
-          <div className="prose prose-invert max-w-none">
-            <p className="text-foreground leading-relaxed text-lg">{question.content}</p>
+        <div className="flex items-center space-x-6 text-sm text-muted-foreground">
+          <div className="flex items-center space-x-2">
+            <User className="w-4 h-4" />
+            <span className="font-medium">{question.author}</span>
           </div>
-        </CardContent>
-      </Card>
+          <div className="flex items-center space-x-2">
+            <Clock className="w-4 h-4" />
+            <span>
+              {formatDistanceToNow(question.createdAt, { addSuffix: true })}
+            </span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <ArrowUp className="w-4 h-4" />
+            <span className="font-medium">{question.votes} votes</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <MessageSquare className="w-4 h-4" />
+            <span>{allAnswers.length} answers</span>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {question.tags.map((tag) => (
+            <Badge
+              key={tag}
+              variant="secondary"
+              className="bg-primary/10 text-primary hover:bg-primary/20"
+            >
+              {tag}
+            </Badge>
+          ))}
+        </div>
+      </CardHeader>
+
+      <CardContent>
+        <div className="prose prose-invert border-t max-w-none pt-4">
+          <p className="text-foreground leading-relaxed text-lg">
+            {question.content}
+          </p>
+        </div>
+      </CardContent>
+    </div>
+  </div>
+</Card>
+
 
       {/* Answers Section */}
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-semibold">
-            {allAnswers.length} {allAnswers.length === 1 ? 'Answer' : 'Answers'}
+            {allAnswers.length} {allAnswers.length === 1 ? "Answer" : "Answers"}
           </h2>
         </div>
 
         {/* Existing Answers */}
         <div className="space-y-4">
           {allAnswers.map((answer) => (
-            <Card key={answer.id} className="bg-gradient-to-br from-muted/50 to-muted/30">
+            <Card
+              key={answer.id}
+              className="bg-gradient-to-br from-muted/50 to-muted/30"
+            >
               <CardContent className="pt-6">
                 <div className="flex space-x-4">
                   {/* Voting */}
@@ -187,9 +278,11 @@ export const QuestionDetails = () => {
                   {/* Answer Content */}
                   <div className="flex-1 space-y-3">
                     <div className="prose prose-invert max-w-none">
-                      <p className="text-foreground leading-relaxed">{answer.content}</p>
+                      <p className="text-foreground leading-relaxed">
+                        {answer.content}
+                      </p>
                     </div>
-                    
+
                     <div className="flex items-center justify-between text-sm text-muted-foreground pt-3 border-t border-border/50">
                       <div className="flex items-center space-x-4">
                         <div className="flex items-center space-x-2">
@@ -198,7 +291,11 @@ export const QuestionDetails = () => {
                         </div>
                         <div className="flex items-center space-x-2">
                           <Clock className="w-4 h-4" />
-                          <span>{formatDistanceToNow(answer.createdAt, { addSuffix: true })}</span>
+                          <span>
+                            {formatDistanceToNow(answer.createdAt, {
+                              addSuffix: true,
+                            })}
+                          </span>
                         </div>
                       </div>
                     </div>
