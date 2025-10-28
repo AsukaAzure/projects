@@ -1,11 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { QuestionCard } from "../components/ui/QuestionCard";
-import { mockQuestions } from "./mock";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
-  Code, 
+  Code,
   Database, 
   Globe, 
   Smartphone, 
@@ -15,6 +14,21 @@ import {
   Users,
   MessageSquare
 } from "lucide-react";
+
+interface Question {
+  id: string;
+  _id: string;
+  title: string;
+  content: string;
+  tags: string[];
+  votes: number;
+  answers: any[];
+  createdAt: Date;
+  author: {
+    username: string;
+  };
+}
+
 
 const topicCategories = [
   {
@@ -56,18 +70,51 @@ const topicCategories = [
 ];
 
 export const Discover = () => {
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch("/api/question/getquestion");
+        const data = await res.json();
+        if (data.success) {
+          // Normalize questions to have a consistent shape
+          const normalizedQuestions = data.questions.map((q: any) => ({
+            ...q,
+            id: q._id,
+            content: q.body || "",
+            answers: q.answers || [],
+            createdAt: new Date(q.createdAt),
+          }));
+          setQuestions(normalizedQuestions);
+        } else {
+          setError("Failed to load questions");
+        }
+      } catch (err) {
+        setError("Error fetching questions");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchQuestions();
+  }, []);
+
+
   // Get all unique tags and their question counts
-  const tagStats = mockQuestions.reduce((acc, question) => {
+  const tagStats = questions.reduce((acc, question) => {
     question.tags.forEach(tag => {
       acc[tag] = (acc[tag] || 0) + 1;
     });
     return acc;
   }, {} as Record<string, number>);
 
-  const filteredQuestions = mockQuestions.filter(question => {
+  const filteredQuestions = questions.filter(question => {
     if (selectedTags.length === 0) return true;
     return selectedTags.some(tag => question.tags.includes(tag));
   });
@@ -90,6 +137,11 @@ export const Discover = () => {
     setSelectedTags([]);
   };
 
+  if (loading) {
+    return <p className="text-center py-12">Loading questions...</p>;
+  }
+  if (error) return <p className="text-center py-12 text-destructive">{error}</p>;
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -108,7 +160,7 @@ export const Discover = () => {
           <h2 className="text-2xl font-semibold">Browse by Category</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {topicCategories.map((category) => {
-              const categoryQuestionCount = mockQuestions.filter(q => 
+              const categoryQuestionCount = questions.filter(q => 
                 q.tags.some(tag => category.tags.includes(tag))
               ).length;
               
@@ -190,7 +242,7 @@ export const Discover = () => {
             
             {filteredQuestions.length > 0 ? (
               <div className="grid gap-6">
-                {filteredQuestions.map((question) => (
+                {filteredQuestions.map((question: any) => (
                   <QuestionCard key={question.id} question={question} />
                 ))}
               </div>

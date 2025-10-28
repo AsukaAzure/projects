@@ -25,10 +25,14 @@ export const QuestionDetails = () => {
   const [votes, setVotes] = useState<Record<string, number>>({});
   const [question, setQuestion] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [userVotes, setUserVotes] = useState<Record<string, "up" | "down" | null>>({});
   // const question = mockQuestions.find(q => q.id === id);
   const storedUser = localStorage.getItem("user");
   const user = storedUser ? JSON.parse(storedUser) : null;
-
+useEffect(() => {
+  const storedVotes = JSON.parse(localStorage.getItem("userVotes") || "{}");
+  setUserVotes(storedVotes);
+}, []);
   useEffect(() => {
     const fetchQuestion = async () => {
       if (!id) return;
@@ -140,12 +144,66 @@ export const QuestionDetails = () => {
 
   const allAnswers = [...question.answers, ...answers];
 
-  const handleVote = (answerId: string, direction: "up" | "down") => {
+  
+
+
+  const handleVote = async (id: string, type: "Question" | "Answer", direction: "up" | "down") => {
+  const storedUser = localStorage.getItem("user");
+  const user = storedUser ? JSON.parse(storedUser) : null;
+  const token = user?.token || user?.access_token;
+
+  if (!token) {
+    toast.error("Please log in to vote");
+    return;
+  }
+
+  // prevent multiple votes
+  if (userVotes[id]) {
+    toast.info("You’ve already voted on this item");
+    return;
+  }
+
+  const voteType = direction === "up" ? 1 : -1;
+
+  try {
     setVotes((prev) => ({
       ...prev,
-      [answerId]: (prev[answerId] || 0) + (direction === "up" ? 1 : -1),
+      [id]: (prev[id] || 0) + voteType,
     }));
-  };
+
+    const res = await fetch(`/api/question/getquestion/${id}/vote`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        targetId: id,
+        targetType: type,
+        voteType,
+      }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Vote failed");
+
+    toast.success(data.message || "Vote recorded!");
+
+    // ✅ Save this vote to localStorage
+    const newVotes = { ...userVotes, [id]: direction };
+    setUserVotes(newVotes);
+    localStorage.setItem("userVotes", JSON.stringify(newVotes));
+  } catch (err: any) {
+    toast.error(err.message);
+    console.error("Vote error:", err);
+    setVotes((prev) => ({
+      ...prev,
+      [id]: (prev[id] || 0) - voteType,
+    }));
+  }
+};
+
+
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
@@ -166,9 +224,10 @@ export const QuestionDetails = () => {
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => handleVote(question.id, "up")}
+        onClick={() => handleVote(question.id, "Question", "up")}
+        disabled={userVotes[question.id] === "up"}
         className="hover:bg-green-300/50 hover:text-success"
-      >
+        >
         <ArrowUp className="w-5 h-5" />
       </Button>
       <span className="text-lg font-semibold">
@@ -177,9 +236,10 @@ export const QuestionDetails = () => {
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => handleVote(question.id, "down")}
+        onClick={() => handleVote(question.id, "Question", "down")}
+        disabled={userVotes[question.id] === "down"}
         className="hover:bg-destructive/30 hover:text-destructive"
-      >
+        >
         <ArrowDown className="w-5 h-5" />
       </Button>
     </div>
@@ -213,9 +273,9 @@ export const QuestionDetails = () => {
         <div className="flex flex-wrap gap-2">
           {question.tags.map((tag) => (
             <Badge
-              key={tag}
-              variant="secondary"
-              className="bg-primary/10 text-primary hover:bg-primary/20"
+            key={tag}
+            variant="secondary"
+            className="bg-primary/10 text-primary hover:bg-primary/20"
             >
               {tag}
             </Badge>
@@ -247,8 +307,8 @@ export const QuestionDetails = () => {
         <div className="space-y-4">
           {allAnswers.map((answer) => (
             <Card
-              key={answer.id}
-              className="bg-gradient-to-br from-muted/50 to-muted/30"
+            key={answer.id}
+            className="bg-gradient-to-br from-muted/50 to-muted/30"
             >
               <CardContent className="pt-6">
                 <div className="flex space-x-4">
@@ -257,9 +317,10 @@ export const QuestionDetails = () => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleVote(answer.id, "up")}
+                      onClick={() => handleVote(answer.id,"Answer", "up")}
+                      disabled={userVotes[answer.id] === "up"}
                       className="hover:bg-green-300/50 hover:text-success"
-                    >
+                      >
                       <ArrowUp className="w-5 h-5" />
                     </Button>
                     <span className="text-lg font-semibold">
@@ -268,7 +329,8 @@ export const QuestionDetails = () => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleVote(answer.id, "down")}
+                      onClick={() => handleVote(answer.id,"Answer", "down")}
+                      disabled={userVotes[answer.id] === "down"}
                       className="hover:bg-destructive/30 hover:text-destructive"
                     >
                       <ArrowDown className="w-5 h-5" />

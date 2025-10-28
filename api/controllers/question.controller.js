@@ -138,64 +138,41 @@ export const postAnswer = async (req, res, next) => {
   }
 };
 
-
 export const vote = async (req, res, next) => {
   try {
-    const { targetId, targetType, voteType } = req.body;
+    const { targetType, voteType } = req.body;
+    const targetId = req.params.id || req.body.targetId;
     const userId = req.user?.id;
 
-    if(!userId) return next(errorHandler(401, "Unauthorized access"));
+    if (!userId) return next(errorHandler(401, "Unauthorized access"));
+    if (!targetId || !targetType || !voteType)
+      return next(errorHandler(400, "Missing vote data"));
 
-    const existingVote = await Voteing.findOne({
-      userId,
-      targetId,
-      targetType,
-      voteType,
-    })
+    const existingVote = await Voteing.findOne({ userId, targetId, targetType });
 
-    if(existingVote) {
-      if(existingVote.voteType === voteType) {
+    if (existingVote) {
+      if (existingVote.voteType === voteType) {
         await existingVote.deleteOne();
-        await updateVoteCount(targetId, targetType);
-        return res.status(200).json({
-          success: true,
-          message: "Vote removed successfully",
-        });
-      }else {
+        return res.status(200).json({ success: true, message: "Vote removed" });
+      } else {
         existingVote.voteType = voteType;
         await existingVote.save();
-        return res.status(200).json({
-          success: true,
-          message: "Vote updated successfully",
-        }); 
+        return res.status(200).json({ success: true, message: "Vote updated" });
       }
-    }else{
-        //new vote
-        const newVote = new Voteing({
-          userId,
-          targetId,
-          targetType,
-          voteType,
-        });
-        await newVote.save();
-        await updateVoteCount(targetId, targetType);
-        return res.status(201).json()({
-          success: true,
-          message: "Vote created successfully",
-    })
-    };
+    }
+
+    const newVote = new Voteing({ userId, targetId, targetType, voteType });
+    await newVote.save();
+
+    const Model = targetType === "Question" ? Question : Answer;
+    await Model.findByIdAndUpdate(
+      targetId,
+      { $inc: { votes: voteType } },
+      { new: true }
+    );
+
+    res.status(201).json({ success: true, message: "Vote recorded" });
   } catch (err) {
     next(err);
-  }
-}
-// helper to update total votes on target
-const updateVoteCount = async (targetType, targetId) => {
-  const allVotes = await Vote.find({ targetId, targetType });
-  const total = allVotes.reduce((sum, v) => sum + v.voteType, 0);
-
-  if (targetType === "Question") {
-    await Question.findByIdAndUpdate(targetId, { votes: total });
-  } else if (targetType === "Answer") {
-    await Answer.findByIdAndUpdate(targetId, { votes: total });
   }
 };
