@@ -85,7 +85,7 @@ export const Home = () => {
       </div>
 
       {/* Search Bar */}
-      <div className="flex gap-3 items-center">
+      {/* <div className="flex gap-3 items-center">
         <Input
           placeholder="Search questions..."
           value={searchTerm}
@@ -98,7 +98,7 @@ export const Home = () => {
         <Button variant="outline" onClick={() => setSortBy("votes")}>
           Most Voted
         </Button>
-      </div>
+      </div> */}
 
       {/* Questions List */}
       <div className="space-y-6">
@@ -108,12 +108,12 @@ export const Home = () => {
               ? `Search Results (${filteredQuestions.length})`
               : "Latest Questions"}
           </h2>
-          {filteredQuestions.length > 0 && (
+          {/* {filteredQuestions.length > 0 && (
             <span className="text-sm text-muted-foreground">
               {filteredQuestions.length} question
               {filteredQuestions.length !== 1 ? "s" : ""}
             </span>
-          )}
+          )} */}
         </div>
 
         {filteredQuestions.length > 0 ? (

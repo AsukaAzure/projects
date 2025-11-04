@@ -5,7 +5,9 @@ import {
   requireAuth,
   getQuestion,
   postAnswer,
-  vote
+  vote,
+  deleteAnswer,
+  deleteQuestion
 } from "../controllers/question.controller.js";
 
 const router = express.Router();
@@ -15,5 +17,7 @@ router.get("/getquestion", listQuestion);
 router.get("/getquestion/:id", getQuestion);
 router.post("/getquestion/:id/answer",requireAuth, postAnswer);
 router.post("/getquestion/:id/vote", requireAuth, vote);
+router.delete("/getquestion/:id/delete", requireAuth, deleteQuestion);
+router.delete("/getquestion/:id/deleteanswer", requireAuth, deleteAnswer);
 
 export default router;

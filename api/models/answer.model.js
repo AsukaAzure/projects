@@ -15,10 +15,19 @@ const AnswerSchema  = new mongoose.Schema({
         ref:"User",
         required:true,
     },
-    votes:{
-        type:Number,
-        default:0,
-    },
+    upvotes:[
+        {
+            type:mongoose.Schema.Types.ObjectId,
+            ref:"User",
+        },
+    ],
+    downvotes: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+        },
+    ],
+    
     createdAt:{
         type:Date,
         default:Date.now,

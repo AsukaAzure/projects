@@ -140,38 +140,204 @@ export const postAnswer = async (req, res, next) => {
 
 export const vote = async (req, res, next) => {
   try {
-    const { targetType, voteType } = req.body;
-    const targetId = req.params.id || req.body.targetId;
+    const targetId = req.params.id; // id of question or answer being voted
+    const { targetType, voteType } = req.body; // targetType: 'question'|'answer', voteType: 'upvote'|'downvote'
     const userId = req.user?.id;
 
     if (!userId) return next(errorHandler(401, "Unauthorized access"));
     if (!targetId || !targetType || !voteType)
       return next(errorHandler(400, "Missing vote data"));
 
-    const existingVote = await Voteing.findOne({ userId, targetId, targetType });
+    // map to models / canonical strings
+    const Model = targetType === "answer" ? Answer : Question;
+    const VoteTargetType = targetType === "answer" ? "Answer" : "Question";
+    const v = voteType === "upvote" ? 1 : voteType === "downvote" ? -1 : 0;
+    if (v === 0) return next(errorHandler(400, "Invalid voteType"));
 
-    if (existingVote) {
-      if (existingVote.voteType === voteType) {
-        await existingVote.deleteOne();
-        return res.status(200).json({ success: true, message: "Vote removed" });
-      } else {
-        existingVote.voteType = voteType;
-        await existingVote.save();
-        return res.status(200).json({ success: true, message: "Vote updated" });
-      }
+    // load target with author and vote arrays
+    let target = await Model.findById(targetId).populate("author");
+    if (!target) return next(errorHandler(404, "Target not found"));
+
+    // prevent voting on own post
+    if (target.author && target.author._id.toString() === userId.toString()) {
+      return next(errorHandler(400, "You cannot vote on your own post"));
     }
 
-    const newVote = new Voteing({ userId, targetId, targetType, voteType });
+    // find existing vote record
+    const existing = await Voteing.findOne({
+      userId,
+      targetId,
+      targetType: VoteTargetType,
+    });
+
+    // helper to ensure arrays exist
+    target.upvotes = Array.isArray(target.upvotes) ? target.upvotes : [];
+    target.downvotes = Array.isArray(target.downvotes) ? target.downvotes : [];
+
+    // If user already voted same way -> remove vote (idempotent)
+    if (existing && existing.voteType === v) {
+      await existing.deleteOne();
+      if (v === 1) {
+        target.upvotes = target.upvotes.filter((u) => u.toString() !== userId.toString());
+      } else {
+        target.downvotes = target.downvotes.filter((u) => u.toString() !== userId.toString());
+      }
+      target.votes = (target.upvotes.length || 0) - (target.downvotes.length || 0);
+      await target.save();
+
+      // update author reputation reversal
+      const author = target.author;
+      if (author) {
+        if (v === 1) author.reputation = (author.reputation || 0) - 10;
+        if (v === -1) author.reputation = (author.reputation || 0) + 2;
+        await author.save();
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: "Vote removed",
+        votes: target.votes,
+        userVote: 0,
+      });
+    }
+
+    // If user had opposite vote -> switch
+    if (existing && existing.voteType !== v) {
+      const prev = existing.voteType;
+      existing.voteType = v;
+      await existing.save();
+
+      // move user between arrays
+      if (v === 1) {
+        // remove from downvotes, add to upvotes
+        target.downvotes = target.downvotes.filter((u) => u.toString() !== userId.toString());
+        if (!target.upvotes.some((u) => u.toString() === userId.toString()))
+          target.upvotes.push(userId);
+      } else {
+        target.upvotes = target.upvotes.filter((u) => u.toString() !== userId.toString());
+        if (!target.downvotes.some((u) => u.toString() === userId.toString()))
+          target.downvotes.push(userId);
+      }
+
+      target.votes = (target.upvotes.length || 0) - (target.downvotes.length || 0);
+      await target.save();
+
+      // adjust reputation for switching
+      const author = target.author;
+      if (author) {
+        // switching from prev -> v: calculate net change
+        if (prev === 1 && v === -1) {
+          // removed +10, applied -2 -> net -12
+          author.reputation = (author.reputation || 0) - 12;
+        } else if (prev === -1 && v === 1) {
+          // removed -2, applied +10 -> net +12
+          author.reputation = (author.reputation || 0) + 12;
+        }
+        await author.save();
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: "Vote updated",
+        votes: target.votes,
+        userVote: v,
+      });
+    }
+
+    // New vote (no existing)
+    const newVote = new Voteing({
+      userId,
+      targetId,
+      targetType: VoteTargetType,
+      voteType: v,
+    });
     await newVote.save();
 
-    const Model = targetType === "Question" ? Question : Answer;
-    await Model.findByIdAndUpdate(
-      targetId,
-      { $inc: { votes: voteType } },
-      { new: true }
-    );
+    if (v === 1) {
+      if (!target.upvotes.some((u) => u.toString() === userId.toString()))
+        target.upvotes.push(userId);
+      // make sure not present in downvotes
+      target.downvotes = target.downvotes.filter((u) => u.toString() !== userId.toString());
+    } else {
+      if (!target.downvotes.some((u) => u.toString() === userId.toString()))
+        target.downvotes.push(userId);
+      target.upvotes = target.upvotes.filter((u) => u.toString() !== userId.toString());
+    }
 
-    res.status(201).json({ success: true, message: "Vote recorded" });
+    target.votes = (target.upvotes.length || 0) - (target.downvotes.length || 0);
+    await target.save();
+
+
+    // update author reputation
+    const author = target.author;
+    if (author) {
+      if (v === 1) author.reputation = (author.reputation || 0) + 10;
+      if (v === -1) author.reputation = (author.reputation || 0) - 2;
+      await author.save();
+    }
+
+    return res.status(201).json({
+      success: true,
+      message: "Vote recorded",
+      votes: target.votes,
+      userVote: v,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteQuestion = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user?.id;
+    const question = await Question.findById(id);
+
+    if (!question) {
+      return next(errorHandler(404, "Question not found"));
+    }
+
+    if (question.author.toString() != userId.toString()) {
+      return next(errorHandler(401, "You are not a authorized person"));
+    }
+
+    await Answer.deleteMany({ question: id });
+    await question.deleteOne();
+
+    return res.status(200).json({
+      success: true,
+      message: "Question deleted!",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteAnswer = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user?.id;
+    const answer = await Answer.findById(id);
+
+    if (!answer) {
+      return next(errorHandler(404, "Answer not Found"));
+    }
+
+    if (answer.author.toString() != userId.toString()) {
+      return next(errorHandler(401, "You are not a authorized person"));
+    }
+
+    // Also remove the answer from the question's answers array
+    await Question.findByIdAndUpdate(answer.question, {
+      $pull: { answers: answer._id },
+    });
+
+    await Answer.findByIdAndDelete(id);
+
+    return res.status(200).json({
+      success: true,
+      message: "Answer Deleted!",
+    });
   } catch (err) {
     next(err);
   }

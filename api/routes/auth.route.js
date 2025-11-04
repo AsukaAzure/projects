@@ -1,10 +1,13 @@
 import express from "express";
-import { signin, signup } from "../controllers/auth.controller.js";
+import { getLeaderboard, getUserProfile, signin, signup } from "../controllers/auth.controller.js";
+import { requireAuth } from "../controllers/question.controller.js";
 
 const router = express.Router();
 
 router.post("/signup", signup);
 router.post("/signin", signin);
+router.get("/:id/profile", requireAuth, getUserProfile);
+router.get("/leaderboard", getLeaderboard);
 
 router.post("/logout", (req, res) => {
   res.clearCookie("access_token", {

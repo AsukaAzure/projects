@@ -1,4 +1,4 @@
-import { Compass, Home, PlusCircle, Search, Trophy, User } from "lucide-react";
+import { Compass, Home, PlusCircle, Search, Trophy, User, Bell } from "lucide-react";
 
 import {
   Sidebar,
@@ -46,6 +46,11 @@ const commu = [
     title: "LeaderBoard",
     url: "/leaderboard",
     icon: Trophy,
+  },
+  {
+    title: "Notifications",
+    url: "/notification",
+    icon: Bell,
   },
 ];
 

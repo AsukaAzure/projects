@@ -4,7 +4,7 @@ import Welcome from "./pages/welcome";
 import Login from "./pages/login";
 import { Home } from "./pages/home";
 import { Discover } from "./pages/discover";
-import Profile from "./pages/profile";
+import { ProfilePage as Profile} from "./pages/profile";
 import { SearchPage as Search } from "./pages/search";
 import { Question } from "./pages/question";
 import MainLayout from "./layouts/MainLayout";
@@ -12,6 +12,7 @@ import AuthLayout from "./layouts/AuthLayout";
 import ProtectedRoutes from "./utils/ProtectedRoute";
 import { QuestionDetails } from "./pages/QuestionDetail";
 import { Leaderboard } from "./pages/leaderboard";
+import { Notifications } from "./pages/Notification";
 
 export default function AppRoute() {
   return (
@@ -21,6 +22,7 @@ export default function AppRoute() {
           <Route element={<ProtectedRoutes />}>
             <Route path="/profile" element={<Profile />} />
             <Route path="/question" element={<Question />} />
+            <Route path="/notification" element={<Notifications />} />
           </Route>
           <Route path="/home" element={<Home />} />
           <Route path="/question/:id" element={<QuestionDetails />} />

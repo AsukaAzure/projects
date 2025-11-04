@@ -104,10 +104,10 @@ export default function Login() {
 
       // login(data.user);
       // console.log(data);
-      if(activeTab === "signup") {
-        toast.success("User created successfully!")
+      if (activeTab === "signup") {
+        toast.success("User created successfully!");
       } else {
-        toast.success("Logged in successfully!")
+        toast.success("Logged in successfully!");
       }
 
       setLoading(false);
@@ -121,7 +121,8 @@ export default function Login() {
   console.log(formData);
 
   return (
-    <>
+    <div className="flex ">
+      
       <form onSubmit={handleSubmit}>
         <div className="flex justify-center items-center min-h-screen mx-auto gap-6">
           <Tabs
@@ -212,6 +213,6 @@ export default function Login() {
           </Tabs>
         </div>
       </form>
-    </>
+    </div>
   );
 }

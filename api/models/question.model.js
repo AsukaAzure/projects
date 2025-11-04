@@ -27,9 +27,23 @@ const QuesSchema = new mongoose.Schema(
       index: true,
     },
 
+    upvotes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+
+    downvotes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+
     votes: {
-        type: Number,
-        default: 0,
+      type: Number,
+      default: 0,
     },
 
     answers: [{

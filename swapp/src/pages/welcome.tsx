@@ -35,35 +35,35 @@ export default function Welcome() {
       title: "Smart Search",
       description:
         "Find solutions quickly with our advanced search and filtering system",
-      color: "text-secondary",
+      color: "text-primary",
     },
     {
       icon: Globe,
       title: "Topic Discovery",
       description:
         "Explore questions by technology - React, JavaScript, Python, Linux and more",
-      color: "text-accent",
+      color: "text-primary",
     },
     {
       icon: Trophy,
       title: "Leaderboard",
       description:
         "Compete with fellow developers and climb the reputation rankings",
-      color: "text-warning",
+      color: "text-primary",
     },
     {
       icon: Users,
       title: "Community Driven",
       description:
         "Connect with developers worldwide and build your professional network",
-      color: "text-success",
+      color: "text-primary",
     },
     {
       icon: BookOpen,
       title: "Knowledge Base",
       description:
         "Build a comprehensive library of programming solutions together",
-      color: "text-muted-foreground",
+      color: "text-primary",
     },
   ];
 
@@ -117,9 +117,9 @@ export default function Welcome() {
           <Button
             size="lg"
             className="bg-gradient-to-r from-primary to-primary-glow hover:from-primary-dark hover:to-primary text-primary-foreground shadow-[var(--shadow-elegant)] hover:shadow-[var(--shadow-glow)] transition-all duration-300 group"
-            onClick={() => navigate("/question")}
+            onClick={() => navigate("/home")}
           >
-            Start Asking Questions
+            Browse Questions
             <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
           </Button>
         </div>
@@ -198,9 +198,9 @@ export default function Welcome() {
             variant="outline"
             size="lg"
             className="border-primary/30 hover:bg-primary/10 hover:border-primary/50"
-            onClick={() => navigate("/home")}
+            onClick={() => navigate("/question")}
           >
-            Browse Questions
+            Start Asking Questions
           </Button>
         </div>
       </div>

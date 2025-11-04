@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { X, Plus, Send, HelpCircle } from "lucide-react";
+import { X, Send, HelpCircle } from "lucide-react";
 import { toast } from "react-toastify";
 
 export const Question = () => {
@@ -14,15 +14,20 @@ export const Question = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [tags, setTags] = useState<string[]>([]);
-  const [currentTag, setCurrentTag] = useState("");
   const [loading, setloading] = useState(false);
   const storedUser = localStorage.getItem("user");
   const user = storedUser ? JSON.parse(storedUser) : null;
 
-  const addTag = () => {
-    if (currentTag.trim() && !tags.includes(currentTag.trim()) && tags.length < 5) {
-      setTags([...tags, currentTag.trim()]);
-      setCurrentTag("");
+  const predefinedTags = [
+    "javascript", "react", "typescript", "nodejs", "python", "java",
+    "html", "css", "sql", "mongodb", "docker", "git", "api", "aws"
+  ];
+
+  const toggleTag = (tag: string) => {
+    if (tags.includes(tag)) {
+      removeTag(tag);
+    } else if (tags.length < 5) {
+      setTags([...tags, tag]);
     }
   };
 
@@ -143,52 +148,42 @@ export const Question = () => {
             <Label className="text-sm font-medium">
               Tags (up to 5)
             </Label>
-            
-            {/* Tag Input */}
-            <div className="flex space-x-2">
-              <Input
-                placeholder="Add a tag (e.g., React, TypeScript, API)"
-                value={currentTag}
-                onChange={(e) => setCurrentTag(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-                className="flex-1 bg-background/50 border-border/50 focus:border-primary/50"
-                disabled={tags.length >= 5}
-              />
-              <Button
-                type="button"
-                onClick={addTag}
-                disabled={!currentTag.trim() || tags.includes(currentTag.trim()) || tags.length >= 5}
-                size="sm"
-                variant="outline"
-                className="border-primary/20 hover:bg-primary/10"
-              >
-                <Plus className="w-4 h-4" />
-              </Button>
-            </div>
 
             {/* Current Tags */}
             {tags.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {tags.map((tag) => (
-                  <Badge
-                    key={tag}
-                    variant="secondary"
-                    className="bg-primary/10 text-primary hover:bg-primary/20 pr-1"
-                  >
-                    {tag}
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
+              <div className="p-3 rounded-md border border-border/50 bg-background/30">
+                <Label className="text-xs text-muted-foreground">Selected Tags</Label>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {tags.map((tag) => (
+                    <Badge
+                      key={tag}
+                      variant="secondary"
+                      className="bg-primary/10 text-primary hover:bg-primary/20 pr-1 cursor-pointer"
                       onClick={() => removeTag(tag)}
-                      className="ml-1 h-auto p-0 w-4 hover:bg-transparent hover:text-destructive"
                     >
-                      <X className="w-3 h-3" />
-                    </Button>
-                  </Badge>
-                ))}
+                      {tag}
+                      <X className="w-3 h-3 ml-1" />
+                    </Badge>
+                  ))}
+                </div>
               </div>
             )}
+
+            {/* Predefined Tags */}
+            <CardDescription>Select from the tags below:</CardDescription>
+            <div className="flex flex-wrap gap-2">
+              {predefinedTags.map((tag) => (
+                <Badge
+                  key={tag}
+                  variant={tags.includes(tag) ? "default" : "outline"}
+                  onClick={() => toggleTag(tag)}
+                  className="cursor-pointer hover:bg-primary/20 transition-colors"
+                  aria-disabled={tags.length >= 5 && !tags.includes(tag)}
+                >
+                  {tag}
+                </Badge>
+            ))}
+              </div>
             
             <p className="text-xs text-muted-foreground">
               Tags help others find and answer your question. Use relevant technology names.
