@@ -1,3 +1,14 @@
+export interface Notification {
+  id: string;
+  type: 'answer' | 'comment' | 'vote';
+  message: string;
+  questionId: string;
+  questionTitle: string;
+  triggeredBy: string;
+  read: boolean;
+  createdAt: Date;
+}
+
 export interface Answer {
   id: string;
   content: string;
@@ -6,7 +17,7 @@ export interface Answer {
   createdAt: Date;
 }
 
-export interface Questions {
+export interface Question {
   id: string;
   title: string;
   content: string;
@@ -17,7 +28,7 @@ export interface Questions {
   createdAt: Date;
 }
 
-export const mockQuestions: Questions[] = [
+export const mockQuestions: Question[] = [
   {
     id: "1",
     title: "How to implement React hooks effectively?",
@@ -103,5 +114,48 @@ export const mockQuestions: Questions[] = [
         createdAt: new Date("2024-01-12")
       }
     ]
+  }
+];
+
+export const mockNotifications: Notification[] = [
+  {
+    id: "n1",
+    type: "answer",
+    message: "ReactExpert answered your question",
+    questionId: "1",
+    questionTitle: "How to implement React hooks effectively?",
+    triggeredBy: "ReactExpert",
+    read: false,
+    createdAt: new Date("2024-01-15")
+  },
+  {
+    id: "n2",
+    type: "answer",
+    message: "HookMaster answered your question",
+    questionId: "1",
+    questionTitle: "How to implement React hooks effectively?",
+    triggeredBy: "HookMaster",
+    read: false,
+    createdAt: new Date("2024-01-16")
+  },
+  {
+    id: "n3",
+    type: "answer",
+    message: "ErrorHandler answered your question",
+    questionId: "2",
+    questionTitle: "Best practices for API error handling in TypeScript?",
+    triggeredBy: "ErrorHandler",
+    read: true,
+    createdAt: new Date("2024-01-14")
+  },
+  {
+    id: "n4",
+    type: "vote",
+    message: "Your answer received 5 upvotes",
+    questionId: "3",
+    questionTitle: "PostgreSQL vs MongoDB: Which database to choose?",
+    triggeredBy: "Multiple users",
+    read: true,
+    createdAt: new Date("2024-01-13")
   }
 ];
