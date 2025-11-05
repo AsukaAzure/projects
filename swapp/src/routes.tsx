@@ -12,7 +12,6 @@ import AuthLayout from "./layouts/AuthLayout";
 import ProtectedRoutes from "./utils/ProtectedRoute";
 import { QuestionDetails } from "./pages/QuestionDetail";
 import { Leaderboard } from "./pages/leaderboard";
-import { Notifications } from "./pages/Notification";
 
 export default function AppRoute() {
   return (
@@ -22,7 +21,6 @@ export default function AppRoute() {
           <Route element={<ProtectedRoutes />}>
             <Route path="/profile" element={<Profile />} />
             <Route path="/question" element={<Question />} />
-            <Route path="/notification" element={<Notifications />} />
           </Route>
           <Route path="/home" element={<Home />} />
           <Route path="/question/:id" element={<QuestionDetails />} />

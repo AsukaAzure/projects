@@ -23,9 +23,9 @@ export const signup = async (req, res, next) => {
       token: token,
     });
   } catch (error) {
-    // 11000 -> mongo db says that there is a duplicate key
+    // 11000 -> mongo says its a dubplicate key
     if (error.code === 11000) {
-      // Duplicate key error
+      // duplicate key error
       if (error.keyPattern.username) {
         return res.status(400).json({ success: false, message: "Username already exists" });
       }
@@ -70,7 +70,7 @@ export const getUserProfile = async (req, res, next) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // 2️⃣ Get user’s questions and answers
+    // get user QandA
     const questions = await Question.find({ author: userId })
       .select("title votes answers createdAt")
       .sort({ createdAt: -1 })
@@ -81,7 +81,6 @@ export const getUserProfile = async (req, res, next) => {
       .sort({ createdAt: -1 })
       .limit(5);
 
-    // 3️⃣ Build stats
     const profileData = {
       username: User.username,
       email: User.email,
@@ -107,11 +106,10 @@ export const getLeaderboard = async (req, res, next) => {
 
     const leaderboard = await Promise.all(
       users.map(async (user) => {
-        // Find all questions and answers by this user
+        // finds q and a of user
         const userQuestions = await Question.find({ author: user._id });
         const userAnswers = await Answer.find({ author: user._id });
 
-        // Count upvotes
         const questionUpvotes = userQuestions.reduce(
           (acc, q) => acc + (q.upvotes?.length || 0),
           0
@@ -132,9 +130,7 @@ export const getLeaderboard = async (req, res, next) => {
           answersGiven: userAnswers.length,
         };
       })
-      // .filter((u) => u.reputation < 0)
     );
-    // Sort by totalUpvotes (and optionally reputation)
     leaderboard.sort((a, b) => b.reputation - a.reputation);
 
     res.status(200).json({

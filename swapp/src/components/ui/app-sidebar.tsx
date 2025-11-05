@@ -46,12 +46,7 @@ const commu = [
     title: "LeaderBoard",
     url: "/leaderboard",
     icon: Trophy,
-  },
-  {
-    title: "Notifications",
-    url: "/notification",
-    icon: Bell,
-  },
+  }
 ];
 
 export function AppSidebar() {

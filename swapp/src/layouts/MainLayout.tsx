@@ -36,9 +36,6 @@ export default function MainLayout() {
         <header className="flex h-14 items-center gap-2 border-b px-4">
           <SidebarTrigger />
           <Link to={"/home"}>
-            {/* <h1 className="text-2xl bg-gradient-to-br from-foreground via-primary-glow to-primary bg-clip-text text-transparent leading-tight font-bold">
-              ByteFlow
-            </h1> */}
             <img src={img1} className="max-w-[20%]"/>
           </Link>
           {user ? (

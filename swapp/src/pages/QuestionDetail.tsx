@@ -269,7 +269,7 @@ export const QuestionDetails = () => {
               variant="ghost"
               size="sm"
               onClick={() => handleVote(question.id, "question", "upvote")}
-              disabled={userVotes[question.id] === "up"}
+              // disabled={userVotes[question.id] === "up"}
               className={userVotes[question.id] === "up" ? "bg-green-100 text-green-700" : "hover:bg-green-300/50 hover:text-success"}
             >
               <ArrowUp className="w-5 h-5" />
@@ -281,7 +281,7 @@ export const QuestionDetails = () => {
               variant="ghost"
               size="sm"
               onClick={() => handleVote(question.id, "question", "downvote")}
-              disabled={userVotes[question.id] === "down"}
+              // disabled={userVotes[question.id] === "down"}
               className={userVotes[question.id] === "down" ? "bg-red-100 text-red-700" : "hover:bg-destructive/30 hover:text-destructive"}
             >
               <ArrowDown className="w-5 h-5" />
@@ -382,7 +382,7 @@ export const QuestionDetails = () => {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleVote(answer.id, "answer", "upvote")}
-                      disabled={userVotes[answer.id] === "up"}
+                      // disabled={userVotes[answer.id] === "up"}
                       className="hover:bg-green-300/50 hover:text-success"
                     >
                       <ArrowUp className="w-5 h-5" />
@@ -394,7 +394,7 @@ export const QuestionDetails = () => {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleVote(answer.id, "answer", "downvote")}
-                      disabled={userVotes[answer.id] === "down"}
+                      // disabled={userVotes[answer.id] === "down"}
                       className="hover:bg-destructive/30 hover:text-destructive"
                     >
                       <ArrowDown className="w-5 h-5" />
