@@ -208,6 +208,10 @@ export const QuestionDetails = () => {
           ans.id === targetId ? { ...ans, votes: data.votes } : ans
         );
         setQuestion((prev: any) => ({ ...prev, answers: updatedAnswers }));
+        setAnswers((prevAnswers) =>
+          prevAnswers.map((ans) =>
+            ans.id === targetId ? { ...ans, votes: data.votes } : ans
+        ));
       }
 
       // Persist user's vote locally (and rely on server for persisted state on reload)
@@ -250,6 +254,9 @@ export const QuestionDetails = () => {
                   if (res.ok) {
                     toast.success("Question deleted!");
                     navigate("/home");
+                  } else {
+                    const errorData = await res.json().catch(() => ({ message: "Failed to delete question" }));
+                    toast.error(errorData.message);
                   }
               }
             }}>
