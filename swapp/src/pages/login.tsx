@@ -118,7 +118,7 @@ export default function Login() {
       setError(error.message);
     }
   };
-  console.log(formData);
+  // console.log(formData);
 
   return (
     <div className="flex ">
@@ -150,6 +150,7 @@ export default function Login() {
                       id="username"
                       placeholder="user"
                       type="text"
+                      required
                       onChange={handleChange}
                     />
                   </div>
@@ -159,6 +160,7 @@ export default function Login() {
                       id="password"
                       placeholder="*********"
                       type="password"
+                      required
                       onChange={handleChange}
                     />
                   </div>
@@ -180,6 +182,7 @@ export default function Login() {
                       type="text"
                       placeholder="user"
                       id="username"
+                      required
                       onChange={handleChange}
                     />
                   </div>
@@ -188,6 +191,8 @@ export default function Login() {
                     <Input
                       id="email"
                       type="email"
+                      pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
+                      required
                       placeholder="user@gmail.com"
                       onChange={handleChange}
                     />
@@ -198,6 +203,7 @@ export default function Login() {
                       id="password"
                       type="password"
                       placeholder="********"
+                      required
                       onChange={handleChange}
                     />
                   </div>

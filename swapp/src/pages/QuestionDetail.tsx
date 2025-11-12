@@ -25,6 +25,7 @@ export const QuestionDetails = () => {
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [question, setQuestion] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [loadquestion, setloadquestion] = useState(true);
   const [answerSortBy, setAnswerSortBy] = useState<"votes" | "recent">("votes");
   const [userVotes, setUserVotes] = useState<Record<string, "up" | "down" | null>>({});
   // const question = mockQuestions.find(q => q.id === id);
@@ -141,19 +142,24 @@ export const QuestionDetails = () => {
     }
   };
 
-  if (!question) {
-    return (
-      <div className="text-center py-12 space-y-4">
-        <h2 className="text-2xl font-semibold">Question not found</h2>
-        <p className="text-muted-foreground">
-          The question you're looking for doesn't exist.
-        </p>
-        <Button asChild>
-          <Link to="/">Back to Home</Link>
-        </Button>
-      </div>
-    );
+  if(!question){
+    return <div className="text-center py-12 space-y-4">
+      <h2 className="text-2xl font-semibold">Loading...</h2>
+    </div>
   }
+  // if (!question) {
+  //   return (
+  //     <div className="text-center py-12 space-y-4">
+  //       <h2 className="text-2xl font-semibold">Question not found</h2>
+  //       <p className="text-muted-foreground">
+  //         The question you're looking for doesn't exist.
+  //       </p>
+  //       <Button asChild>
+  //         <Link to="/">Back to Home</Link>
+  //       </Button>
+  //     </div>
+  //   );
+  // }
 
   const sortedAnswers = [...question.answers, ...answers].sort((a, b) => {
     if (answerSortBy === "votes") {

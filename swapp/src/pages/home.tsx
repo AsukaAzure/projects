@@ -1,25 +1,20 @@
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { QuestionCard } from "@/components/ui/QuestionCard";
-import { Search } from "lucide-react";
 
 export const Home = () => {
-  // Explicit Question type to avoid 'never' inference and provide proper typing throughout the component
   interface Question {
     _id: string;
-  title: string;
-  body?: string;
-  tags: string[];
-  votes: number;
-  createdAt: string;
-  author: {
-    _id: string;
-    username: string;
-    email: string;
-  };
-  answers?: any[]; 
-    // add other fields returned by your API as needed
+    title: string;
+    body?: string;
+    tags: string[];
+    votes: number;
+    createdAt: string;
+    author: {
+      _id: string;
+      username: string;
+      email: string;
+    };
+    answers?: any[];
   }
 
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -84,63 +79,17 @@ export const Home = () => {
         </div>
       </div>
 
-      {/* Search Bar */}
-      {/* <div className="flex gap-3 items-center">
-        <Input
-          placeholder="Search questions..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-md"
-        />
-        <Button variant="outline" onClick={() => setSortBy("recent")}>
-          Recent
-        </Button>
-        <Button variant="outline" onClick={() => setSortBy("votes")}>
-          Most Voted
-        </Button>
-      </div> */}
-
       {/* Questions List */}
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-semibold">
-            {searchTerm
-              ? `Search Results (${filteredQuestions.length})`
-              : "Latest Questions"}
-          </h2>
-          {/* {filteredQuestions.length > 0 && (
-            <span className="text-sm text-muted-foreground">
-              {filteredQuestions.length} question
-              {filteredQuestions.length !== 1 ? "s" : ""}
-            </span>
-          )} */}
+          <h2 className="text-2xl font-semibold">Latest Questions</h2>
         </div>
 
-        {filteredQuestions.length > 0 ? (
-          <div className="grid gap-6">
-            {filteredQuestions.map((question) => (
-              <QuestionCard key={question._id} question={question} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12 space-y-4">
-            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto">
-              <Search className="w-8 h-8 text-muted-foreground" />
-            </div>
-            <h3 className="text-lg font-medium">No questions found</h3>
-            <p className="text-muted-foreground">
-              {searchTerm
-                ? `No questions match "${searchTerm}". Try different keywords.`
-                : "Be the first to ask a question!"}
-            </p>
-            <Button
-              className="bg-gradient-to-r from-primary to-primary-glow hover:from-primary-dark hover:to-primary"
-              onClick={() => (window.location.href = "/ask")}
-            >
-              Ask a Question
-            </Button>
-          </div>
-        )}
+        <div className="grid gap-6">
+          {filteredQuestions.map((question) => (
+            <QuestionCard key={question._id} question={question} />
+          ))}
+        </div>
       </div>
     </div>
   );

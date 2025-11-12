@@ -20,7 +20,7 @@ export const Question = () => {
 
   const predefinedTags = [
     "javascript", "react", "typescript", "nodejs", "python", "java",
-    "html", "flutter", "android", "ios", "bash", "arch", "networking", "linux", "ai", "git", "machine-learning", "css", "sql", "mongodb", "docker", "git", "api", "aws"
+    "html", "flutter", "android", "ios", "bash", "arch", "networking", "linux", "ai", "machine-learning", "css", "sql", "mongodb", "docker", "git", "api", "aws"
   ];
 
   const toggleTag = (tag: string) => {

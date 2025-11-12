@@ -20,7 +20,6 @@ interface LeaderboardUser {
   totalUpvotes: number;
   rank: number;
   avatar: string;
-  // These fields are not in the leaderboard data, so we'll use placeholders
   questionsAsked: number;
   answersGiven: number;
   badges: string[];
@@ -76,7 +75,7 @@ export const Leaderboard = () => {
           throw new Error(data.message || "Failed to fetch leaderboard");
         }
 
-        // Map backend data to frontend structure
+        // Mamapping baakend data to frontend structure
         const formattedData: LeaderboardUser[] = data.leaderboard.map(
           (user: any, index: number) => ({
             ...user,
@@ -84,7 +83,6 @@ export const Leaderboard = () => {
             rank: index + 1,
             avatar: getInitials(user.username),
             badges: getReputationLevel(user.reputation),
-            // These are not provided by the leaderboard endpoint, so we use placeholders
             questionsAsked: user.questionsAsked || 0,
             answersGiven: user.answerGiven || 0,
           })
@@ -132,10 +130,10 @@ export const Leaderboard = () => {
                 key={user.id}
                 className={`relative overflow-hidden ${
                   index === 0
-                    ? "md:order-2 border-yellow-500/20 bg-gradient-to-br from-yellow-500/5 to-amber-500/5"
+                    ? "md:order-2 border-yellow-500/20 from-yellow-500/5 to-amber-500/5"
                     : index === 1
-                    ? "md:order-1 border-gray-400/20 bg-gradient-to-br from-gray-400/5 to-slate-400/5"
-                    : "md:order-3 border-amber-600/20 bg-gradient-to-br from-amber-600/5 to-orange-500/5"
+                    ? "md:order-1 border-gray-400/20 from-gray-400/5 to-slate-400/5"
+                    : "md:order-3 border-amber-600/20 from-amber-600/5 to-orange-500/5"
                 }`}
               >
                 <CardHeader className="text-center pb-2">
@@ -143,7 +141,7 @@ export const Leaderboard = () => {
                     {getRankIcon(user.rank)}
                   </div>
                   <Avatar className="w-16 h-16 mx-auto mb-3">
-                    <AvatarFallback className="text-lg font-semibold bg-gradient-to-br from-primary to-primary-glow text-primary-foreground">
+                    <AvatarFallback className="text-lg font-semibold from-primary to-primary-glow text-primary-foreground">
                       {user.avatar}
                     </AvatarFallback>
                   </Avatar>
@@ -161,7 +159,7 @@ export const Leaderboard = () => {
                     <div className="flex items-center justify-center space-x-1">
                       <MessageSquare className="w-4 h-4" />
                       <span>
-                        {user.reputation > 100 ? "?" : user.questionsAsked}
+                        {user.reputation > 100 ? "-" : user.questionsAsked}
                       </span>
                     </div>
                     <div className="flex items-center justify-center space-x-1">
@@ -226,7 +224,7 @@ export const Leaderboard = () => {
                     <div className="flex items-center space-x-1">
                       <MessageSquare className="w-4 h-4" />
                       <span>
-                        {user.reputation > 100 ? "?" : user.questionsAsked}
+                        {user.reputation > 100 ? "-" : user.questionsAsked}
                       </span>
                       <span className="hidden sm:inline">questions</span>
                     </div>
@@ -234,7 +232,7 @@ export const Leaderboard = () => {
                     <div className="flex items-center space-x-1">
                       <Users className="w-4 h-4" />
                       <span>
-                        {user.reputation > 100 ? "?" : user.answersGiven}
+                        {user.reputation > 100 ? "-" : user.answersGiven}
                       </span>
                       <span className="hidden sm:inline">answers</span>
                     </div>
@@ -264,48 +262,6 @@ export const Leaderboard = () => {
           </CardContent>
         </Card>
       )}
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Questions
-            </CardTitle>
-            <MessageSquare className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">2,847</div>
-            <p className="text-xs text-muted-foreground">
-              +12% from last month
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Users</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">1,234</div>
-            <p className="text-xs text-muted-foreground">+8% from last month</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Upvotes</CardTitle>
-            <ThumbsUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">15,629</div>
-            <p className="text-xs text-muted-foreground">
-              +23% from last month
-            </p>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 };

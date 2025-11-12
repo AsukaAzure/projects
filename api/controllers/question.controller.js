@@ -114,6 +114,14 @@ export const postAnswer = async (req, res, next) => {
     if (!question) {
       return next(errorHandler(404, "Question not found"));
     }
+
+    if(question.author.toString() === userId.toString()){
+      return res.status(400).json({
+        success: false,
+        message: "You cannot answer your own question",
+      });
+    }
+
     const newAnswer = new Answer({
       content,
       author: userId,
@@ -197,6 +205,10 @@ export const vote = async (req, res, next) => {
       { new: true }
     ).populate("author", "username reputation");
 
+    // always return a numeric vote count — fallback to computed totalVotes if model doesn't have `votes`
+    const finalVotes =
+      typeof updatedTarget?.votes === "number" ? updatedTarget.votes : totalVotes;
+
     if (authorId && authorId !== userId.toString()) {
       let repDelta = 0;
       if (prevVote === null) {
@@ -218,7 +230,7 @@ export const vote = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       message: (prevVote === null ? "Vote recorded" : prevVote === v ? "Vote removed" : "Vote updated"),
-      votes: updatedTarget ? updatedTarget.votes : totalVotes,
+      votes: finalVotes,
       userVote,
     });
   } catch (error) {

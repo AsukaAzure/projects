@@ -128,16 +128,6 @@ export const ProfilePage = () => {
               </div>
             </div>
             
-            {/* <div className="flex space-x-2">
-              <Button variant="outline" size="sm">
-                <Edit className="w-4 h-4 mr-2" />
-                Edit Profile
-              </Button>
-              <Button variant="outline" size="sm">
-                <Settings className="w-4 h-4 mr-2" />
-                Settings
-              </Button>
-            </div> */}
           </div>
         </CardHeader>
       </Card>

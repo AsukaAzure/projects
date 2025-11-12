@@ -11,18 +11,18 @@ const MONGO_URI =
 const connectDB = async () => {
   try {
     await mongoose.connect(MONGO_URI);
-    console.log("✅ Connected to MongoDB");
+    console.log("connected to MongoDB");
   } catch (err) {
-    console.error("❌ DB Connection Error:", err);
+    console.error("db not connected:", err);
     process.exit(1);
   }
 };
 
-// 📅 Random date between 2023–2025
+// Random date between 2023–2025
 const randomDate = () =>
   faker.date.between({ from: "2023-01-01", to: "2025-11-01" });
 
-// 🔄 Shuffle helper
+// Shuffle helper
 const shuffle = (array) => array.sort(() => Math.random() - 0.5);
 
 const seedData = async () => {
@@ -36,9 +36,9 @@ const seedData = async () => {
       Answer.deleteMany(),
       Voteing.deleteMany(),
     ]);
-    console.log("🧽 Cleared old data");
+    console.log("clean old data");
 
-    // 👥 Create Users
+    // Create Users
     const users = Array.from({ length: 20 }).map(() => ({
       username: faker.internet.displayName(),
       email: faker.internet.email(),
@@ -47,9 +47,9 @@ const seedData = async () => {
       createdAt: randomDate(),
     }));
     const createdUsers = await User.insertMany(users);
-    console.log("👥 Users inserted:", createdUsers.length);
+    console.log("Users inserted:", createdUsers.length);
 
-    // 🧠 Topics and Question Templates
+    // Topics and Question Templates
     const techTopics = [
       "javascript", "react", "nodejs", "python", "mongodb", "docker",
       "linux", "networking", "flutter", "git", "sql", "api", "aws",
@@ -69,7 +69,7 @@ const seedData = async () => {
       (topic) => `What’s the difference between REST and GraphQL in ${topic}?`,
     ];
 
-    // ❓ Create Questions
+    // Create Questions
     const questions = Array.from({ length: 80 }).map(() => {
       const topic = faker.helpers.arrayElement(techTopics);
       const author = faker.helpers.arrayElement(createdUsers);
@@ -77,7 +77,7 @@ const seedData = async () => {
       return {
         title: questionTemplate(topic),
         body: `I'm working on a ${topic} project and facing some issues. ${faker.lorem.sentences(3)} Can someone guide me how to fix or improve it?`,
-        tags: [topic, ...faker.helpers.arrayElements(techTopics, 2)],
+        tags: Array.from(new Set([topic, ...faker.helpers.arrayElements(techTopics, 2)])),
         author: author._id,
         upvotes: [],
         downvotes: [],
@@ -87,9 +87,9 @@ const seedData = async () => {
     });
 
     const createdQuestions = await Question.insertMany(questions);
-    console.log("❓ Questions inserted:", createdQuestions.length);
+    console.log("Questions inserted:", createdQuestions.length);
 
-    // 💬 Create Answers
+    // Create Answers
     const answers = [];
     for (const q of createdQuestions) {
       const answerCount = faker.number.int({ min: 2, max: 6 });
@@ -120,14 +120,14 @@ const seedData = async () => {
     }
 
     const createdAnswers = await Answer.insertMany(answers);
-    console.log("💬 Answers inserted:", createdAnswers.length);
+    console.log("Answers inserted:", createdAnswers.length);
 
-    // 🔗 Link answers to questions
+    // Link answers to questions
     for (const a of createdAnswers) {
       await Question.findByIdAndUpdate(a.question, { $push: { answers: a._id } });
     }
 
-    // 🗳️ Create Votes
+    // Create Votes
     const votes = [];
 
     // Votes for questions
@@ -168,9 +168,9 @@ const seedData = async () => {
     }
 
     await Voteing.insertMany(votes);
-    console.log("🗳️ Votes inserted:", votes.length);
+    console.log("Votes inserted:", votes.length);
 
-    // 💯 Update User Reputation Based on Votes
+    // Update User Reputation Based on Votes
     for (const user of createdUsers) {
       const userQuestions = createdQuestions.filter(
         (q) => q.author.toString() === user._id.toString()
@@ -189,12 +189,12 @@ const seedData = async () => {
       await user.save();
     }
 
-    console.log("🏆 Users reputation updated based on total votes");
+    console.log("Users reputation updated based on total votes");
 
-    console.log("✅ Database successfully seeded with realistic user interactions!");
+    console.log("Database successfully seeded with realistic user interactions!");
     process.exit(0);
   } catch (err) {
-    console.error("❌ Seeding error:", err);
+    console.error("Seeding error:", err);
     process.exit(1);
   }
 };

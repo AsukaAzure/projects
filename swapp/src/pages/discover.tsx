@@ -10,8 +10,6 @@ import {
   Smartphone, 
   Terminal, 
   Cpu, 
-  TrendingUp,
-  Users,
   MessageSquare
 } from "lucide-react";
 
